@@ -15,12 +15,6 @@ function App() {
   
       </header><br></br>
 
-      {/* 🔹 Hero Section */}
-      {/* <section id="home" className="hero">
-        <h2>Welcome</h2>
-        <p> Value Storage</p>
-
-      </section> */}
       <section id="valueStorage">
         <div className="card">
               <label>Enter a value to store below </label><br></br>
@@ -54,20 +48,6 @@ function App() {
         </div>
         
       </section>
-
-      {/* 🔹 About Section
-      <section id="about" className="about">
-        <h2>About</h2>
-        <p>
-          Enter a value ans store it for 24h
-        </p>
-      </section>
-
-      {/* 🔹 Contact Section */}
-      {/* <section id="contact" className="contact">
-        <h2>Contact</h2>
-        <p>Email: example@email.com</p>
-      </section>  */}
 
       {/* 🔹 Footer */}
       <footer className="footer">
