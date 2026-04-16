@@ -3,14 +3,19 @@ import './App.css'
 
 function App() {
   const [value, setValue] = useState('');
+  const [savedValue, setSavedValue] = useState('');
 
   const handleValueChange = (event) => {
       setValue(event.target.value)
   };
   const saveHandler = () => {
-        console.log(value);
+        console.log(value),
+        setSavedValue(value),
+      console.log(savedValue);
   };
 
+  const date = new Date ();
+  date.setTime(date.getTime() + (24 * 60 * 60 * 1000))
 
   return (
     <div className="app">
@@ -43,6 +48,8 @@ function App() {
           </div>
           <div className="card">
             <label>Stored Value: </label>
+            <div>{savedValue}</div>
+
   
           </div>
           <div className="card">
