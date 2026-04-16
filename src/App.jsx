@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './App.css'
+//Check if cookies are enabled in the browser
+console.log(navigator.cookieEnabled);
 
 function App() {
   const [value, setValue] = useState('');
@@ -13,11 +15,23 @@ function App() {
         setSavedValue(value),
       console.log(savedValue);
   };
-
   const [currentDate, setCurrentDate] = useState(new Date());
   const [expiryDate, setEspiryDate] = useState(new Date(currentDate.getTime() + 24 *60 * 60 * 1000)) 
   const isActive = currentDate < expiryDate;
 
+// const dataToStore = {
+//   value: savedValue,
+//   savedTime: currentDate.toLocaleString(),
+//   expiryTime: expiryDate.toLocaleString(),
+// }
+// document.cookie = "dataToStore=" + JSON.stringify(dataToStore) + "; expires=" + expiryDate.toUTCString() + "; path=/";
+function setCookie(name, value, daysToLive) {
+
+        value: savedValue,
+        savedTime: currentDate.toLocaleString(),
+        expiryTime: expiryDate.toLocaleString(),
+
+};
   return (
     <div className="app">
 
