@@ -2,7 +2,15 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [value, setValue] = useState('');
+
+  const handleValueChange = (event) => {
+      setValue(event.target.value)
+  };
+  const saveHandler = () => {
+        console.log(value);
+  };
+
 
   return (
     <div className="app">
@@ -18,8 +26,8 @@ function App() {
       <section id="valueStorage">
         <div className="card">
               <label>Enter a value to store below </label><br></br>
-              <input type="text" id="value" name="value"></input>
-              <button type="button" onChange="saveHandler">Save Value</button>
+              <input type="text" id="value" name="value" onChange={handleValueChange}></input>
+              <button type="button" onClick={saveHandler}>Save Value</button>
 
         </div>
       </section><br></br>
