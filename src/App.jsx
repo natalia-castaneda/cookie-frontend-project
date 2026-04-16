@@ -14,8 +14,9 @@ function App() {
       console.log(savedValue);
   };
 
-  const date = new Date ();
-  date.setTime(date.getTime() + (24 * 60 * 60 * 1000))
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [expiryDate, setEspiryDate] = useState(new Date(currentDate.getTime() + 24 *60 * 60 * 1000)) 
+  const isActive = currentDate < expiryDate;
 
   return (
     <div className="app">
@@ -44,6 +45,7 @@ function App() {
           
           <div className="card">
             <label>Status: </label>
+            <div>{isActive ? 'Active' : 'Expired'}</div>
    
           </div>
           <div className="card">
@@ -54,10 +56,12 @@ function App() {
           </div>
           <div className="card">
             <label>Saved Time: </label>
+            <div>{currentDate.toLocaleString()}</div>
 
           </div>
           <div className="card">
             <label>Expiry time: </label>
+            <div>{expiryDate.toLocaleString()}</div>
 
           </div>
         </div>
