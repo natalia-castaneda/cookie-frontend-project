@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-  const COOKIE_NAME = "storedValueCookie";
+  const COOKIE_NAME = "storedValuesCookie";
 
   const [value, setValue] = useState("");
-  const [storedData, setStoredData] = useState(null);
+  const [storedItems, setStoredItems] = useState([]);
   const [status, setStatus] = useState("No value stored");
   const [message, setMessage] = useState("");
 
@@ -41,23 +41,32 @@ function App() {
   function checkCookieStatus() {
     const data = getCookie(COOKIE_NAME);
 
-    if (!data) {
-      setStoredData(null);
+    if (!data || data.length === 0) {
+      setStoredItems([]);
       setStatus("No value stored");
       return;
     }
 
     const now = Date.now();
 
-    if (now >= data.expiryTime) {
-      deleteCookie(COOKIE_NAME);
-      setStoredData(null);
-      setStatus("Expired");
-      setMessage("The cookie has expired and was removed.");
+    const validItems = data.filter((item) => now < item.expiryTime);
+    const expiredItems = data.filter((item) => now >= item.expiryTime);
+
+    if (expiredItems.length > 0) {
+      if (validItems.length > 0) {
+        setCookie(COOKIE_NAME, validItems, 24);
+        setMessage("Some expired values were removed automatically.");
+        setStatus("Active");
+      } else {
+        deleteCookie(COOKIE_NAME);
+        setMessage("All stored values expired and were removed.");
+        setStatus("Expired");
+      }
     } else {
-      setStoredData(data);
       setStatus("Active");
     }
+
+    setStoredItems(validItems);
   }
 
   useEffect(() => {
@@ -76,27 +85,58 @@ function App() {
       return;
     }
 
+    const currentItems = getCookie(COOKIE_NAME) || [];
     const savedTime = Date.now();
     const expiryTime = savedTime + 24 * 60 * 60 * 1000;
 
-    const dataToStore = {
-      value: value,
-      savedTime: savedTime,
-      expiryTime: expiryTime,
+    const newItem = {
+      id: savedTime,
+      value: value.trim(),
+      savedTime,
+      expiryTime,
     };
 
-    setCookie(COOKIE_NAME, dataToStore, 24);
-    setStoredData(dataToStore);
+    const updatedItems = [...currentItems, newItem];
+
+    setCookie(COOKIE_NAME, updatedItems, 24);
+    setStoredItems(updatedItems);
     setStatus("Active");
     setMessage("Value saved successfully.");
     setValue("");
   }
 
   function simulateExpiry() {
-    deleteCookie(COOKIE_NAME);
-    setStoredData(null);
-    setStatus("Expired");
-    setMessage("Expiry simulated. Cookie removed.");
+  const data = getCookie(COOKIE_NAME);
+
+  if (!data || data.length === 0) {
+    setMessage("No values to expire.");
+    return;
+  }
+
+  // force all items to be expired
+  const expiredItems = data.map((item) => ({
+    ...item,
+    expiryTime: Date.now() - 1000, // 1 second in the past
+  }));
+
+  setCookie(COOKIE_NAME, expiredItems, 24);
+  setMessage("Expiry simulated. Items will now be marked as expired.");
+}
+
+  function deleteOneItem(id) {
+    const updatedItems = storedItems.filter((item) => item.id !== id);
+
+    if (updatedItems.length === 0) {
+      deleteCookie(COOKIE_NAME);
+      setStoredItems([]);
+      setStatus("No value stored");
+      setMessage("All stored values removed.");
+    } else {
+      setCookie(COOKIE_NAME, updatedItems, 24);
+      setStoredItems(updatedItems);
+      setStatus("Active");
+      setMessage("Value removed successfully.");
+    }
   }
 
   return (
@@ -125,7 +165,11 @@ function App() {
             Save Value
           </button>
 
-          <button type="button" onClick={simulateExpiry} style={{ marginLeft: "10px" }}>
+          <button
+            type="button"
+            onClick={simulateExpiry}
+            style={{ marginLeft: "10px" }}
+          >
             Simulate Expiry
           </button>
         </div>
@@ -136,35 +180,54 @@ function App() {
 
         {message && <p>{message}</p>}
 
-        <div className="feature-list">
-          <div className="card">
-            <label>Status:</label>
-            <div>{status}</div>
-          </div>
-
-          <div className="card">
-            <label>Stored Value:</label>
-            <div>{storedData ? storedData.value : "No value stored"}</div>
-          </div>
-
-          <div className="card">
-            <label>Saved Time:</label>
-            <div>
-              {storedData
-                ? new Date(storedData.savedTime).toLocaleString()
-                : "-"}
-            </div>
-          </div>
-
-          <div className="card">
-            <label>Expiry Time:</label>
-            <div>
-              {storedData
-                ? new Date(storedData.expiryTime).toLocaleString()
-                : "-"}
-            </div>
-          </div>
+        <div className="card">
+          <label>Status:</label>
+          <div>{status}</div>
         </div>
+
+        <div className="card">
+          <label>Total Stored Values:</label>
+          <div>{storedItems.length}</div>
+        </div>
+
+        {storedItems.length === 0 ? (
+          <div className="card">
+            <p>No value stored</p>
+          </div>
+        ) : (
+          storedItems.map((item, index) => (
+            <div className="card" key={item.id} style={{ marginTop: "20px" }}>
+              <h3>Stored Item {index + 1}</h3>
+
+              <p>
+                <strong>Value:</strong> {item.value}
+              </p>
+
+              <p>
+                <strong>Saved Time:</strong>{" "}
+                {new Date(item.savedTime).toLocaleString()}
+              </p>
+
+              <p>
+                <strong>Expiry Time:</strong>{" "}
+                {new Date(item.expiryTime).toLocaleString()}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                {Date.now() < item.expiryTime ? "Active" : "Expired"}
+              </p>
+
+              <button
+                type="button"
+                onClick={() => deleteOneItem(item.id)}
+                style={{ marginTop: "10px" }}
+              >
+                Delete This Value
+              </button>
+            </div>
+          ))
+        )}
       </section>
     </div>
   );
